@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSXVAG", "src\PSXVAG.csproj", "{3E75A5F5-09AF-479E-ACAA-7AADC30FB3F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "example", "example", "{8FE2F930-65A4-455F-8725-33327CBE15E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vag2wav", "example\vag2wav\vag2wav.csproj", "{BDA8292E-2011-4BCC-99E0-BCC668C4D460}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wav2vag", "example\wav2vag\wav2vag.csproj", "{807323A9-6087-477E-8F72-A2612CEE5CEB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E75A5F5-09AF-479E-ACAA-7AADC30FB3F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E75A5F5-09AF-479E-ACAA-7AADC30FB3F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E75A5F5-09AF-479E-ACAA-7AADC30FB3F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E75A5F5-09AF-479E-ACAA-7AADC30FB3F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDA8292E-2011-4BCC-99E0-BCC668C4D460}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDA8292E-2011-4BCC-99E0-BCC668C4D460}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDA8292E-2011-4BCC-99E0-BCC668C4D460}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDA8292E-2011-4BCC-99E0-BCC668C4D460}.Release|Any CPU.Build.0 = Release|Any CPU
+		{807323A9-6087-477E-8F72-A2612CEE5CEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{807323A9-6087-477E-8F72-A2612CEE5CEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{807323A9-6087-477E-8F72-A2612CEE5CEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{807323A9-6087-477E-8F72-A2612CEE5CEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BDA8292E-2011-4BCC-99E0-BCC668C4D460} = {8FE2F930-65A4-455F-8725-33327CBE15E0}
+		{807323A9-6087-477E-8F72-A2612CEE5CEB} = {8FE2F930-65A4-455F-8725-33327CBE15E0}
+	EndGlobalSection
+EndGlobal
