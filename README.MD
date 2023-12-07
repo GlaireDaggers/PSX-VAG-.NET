@@ -43,12 +43,17 @@ VAGWriter(samplerate, stream, leaveOpen)
 
 There's also a more advanced constructor which gives you more options:
 ```
-VAGWriter(interleaved, samplerate, channelCount, chunkSize, stream, leaveOpen);
+VAGWriter(interleaved, addLoopFlags, samplerate, channelCount, chunkSize, stream, leaveOpen);
 ```
 
 Multi-channel audio files must be interleaved. This will split the audio data into chunks of chunkSize bytes, with each chunk in the output file containing the data for one channel. The chunks for each channel will be interleaved (as LRLRLR... etc).
 
 Additionally, chunkSize must be a multiple of 2048 bytes (2048 or 4096 are generally decent values).
+
+There's also that "addLoopFlags" parameter. It has the effect of setting end+repeat flags on the last frame of every chunk in the output file. This might
+sound strange (why would you want every chunk to loop?), but it's actually necessary for streaming playback in PSn00bSDK - it abuses the hardware's looping
+support by overriding the loop address register to point at the *next* chunk in SPU RAM. This way the "repeat" flag actually serves the purpose of making the
+SPU jump to that next chunk.
 
 ## Examples
 

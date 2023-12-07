@@ -13,6 +13,9 @@ public class Options
     [Option('i', "interleaved", Required = false, HelpText = "Output interleaved VAG format (required for >1 channels)")]
     public bool interleaved { get; set; }
 
+    [Option('l', "loopflags", Required = false, HelpText = "Set loop repeat flags at end of each chunk (necessary for streaming playback in PSn00bSDK)")]
+    public bool loopflags { get; set; }
+
     [Option('c', "chunksize", Required = false, HelpText = "Output chunk size in bytes (if interleaved, must be >0 and a multiple of 2048)")]
     public int chunkSize { get; set; }
 
@@ -53,7 +56,7 @@ public static class Program
 
                 string outPath = o.outputFile ?? Path.ChangeExtension(inPath, "vag");
                 Stream outStream = File.OpenWrite(outPath);
-                using var vagWriter = new VAGWriter(o.interleaved, wavReader.WaveFormat.SampleRate, wavReader.WaveFormat.Channels, o.chunkSize, outStream, false);
+                using var vagWriter = new VAGWriter(o.interleaved, o.loopflags, wavReader.WaveFormat.SampleRate, wavReader.WaveFormat.Channels, o.chunkSize, outStream, false);
 
                 vagWriter.AppendSamples(sampleData16);
                 vagWriter.Finish();

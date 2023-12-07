@@ -18,6 +18,7 @@ public class VAGWriter : IDisposable
         public int prev1, prev2;
     }
 
+    private bool _loopFlags;
     private bool _interleaved;
     private int _chunkSizeBytes;
     private int _samplesPerChunk;
@@ -38,7 +39,7 @@ public class VAGWriter : IDisposable
     /// <param name="samplerate">The samplerate of the VAG file</param>
     /// <param name="outStream">The output stream to write to</param>
     /// <param name="leaveOpen">Whether to leave the output stream open when disposing this writer</param>
-    public VAGWriter(int samplerate, Stream outStream, bool leaveOpen) : this(false, samplerate, 1, 0, outStream, leaveOpen)
+    public VAGWriter(int samplerate, Stream outStream, bool leaveOpen) : this(false, false, samplerate, 1, 0, outStream, leaveOpen)
     {
     }
 
@@ -46,12 +47,13 @@ public class VAGWriter : IDisposable
     /// Construct a VAG writer
     /// </summary>
     /// <param name="interleaved">Whether the output file is interleaved or not. Must be true if channelCount > 1</param>
+    /// <param name="addLoopFlags">Whether to add loop flags to the end of each chunk (needed by PSn00bSDK for streaming playback)</param>
     /// <param name="samplerate">The samplerate of the VAG file</param>
     /// <param name="channelCount">The number of channels in the VAG file</param>
     /// <param name="chunkSize">The size of each chunk of the VAG file in bytes (must be non-zero and multiple of 2048 if interleaved)</param>
     /// <param name="outStream">The output stream to write to</param>
     /// <param name="leaveOpen">Whether to leave the output stream open when disposing this writer</param>
-    public VAGWriter(bool interleaved, int samplerate, int channelCount, int chunkSize, Stream outStream, bool leaveOpen)
+    public VAGWriter(bool interleaved, bool addLoopFlags, int samplerate, int channelCount, int chunkSize, Stream outStream, bool leaveOpen)
     {
         if (interleaved && (chunkSize <= 0 || chunkSize % 2048 != 0))
         {
@@ -69,6 +71,7 @@ public class VAGWriter : IDisposable
         }
 
         _interleaved = interleaved;
+        _loopFlags = addLoopFlags;
 
         _channels = new List<short>[channelCount];
         _encoderStates = new EncoderState[channelCount];
@@ -184,8 +187,8 @@ public class VAGWriter : IDisposable
 
             byte flags = 0;
 
-            // last frame (and any padding frames) have end+mute set
-            if (i >= frames - 1 || srcOffset >= _channels[0].Count)
+            // last frame has end+mute set
+            if (i == frames - 1)
             {
                 flags = 1;
             }
@@ -232,7 +235,7 @@ public class VAGWriter : IDisposable
 
             for (int ch = 0; ch < _channels.Length; ch++)
             {
-                EncodeChunk(ref _encoderStates[ch], CollectionsMarshal.AsSpan(_channels[ch]).Slice(srcOffset), _chunkTmp);
+                EncodeChunk(ref _encoderStates[ch], i == chunks - 1, CollectionsMarshal.AsSpan(_channels[ch]).Slice(srcOffset), _chunkTmp);
                 _writer.Write(_chunkTmp);
             }
         }
@@ -249,12 +252,8 @@ public class VAGWriter : IDisposable
         _writer.BaseStream.Seek(pos, SeekOrigin.Begin);
     }
 
-    private void EncodeChunk(ref EncoderState state, Span<short> samples, Span<byte> data)
+    private void EncodeChunk(ref EncoderState state, bool lastChunk, Span<short> samples, Span<byte> data)
     {
-        int actualFramesInSrc = samples.Length / Common.SAMPLES_PER_FRAME;
-        if (samples.Length % Common.SAMPLES_PER_FRAME != 0)
-            actualFramesInSrc++;
-
         int frames = _samplesPerChunk / Common.SAMPLES_PER_FRAME;
 
         for (int i = 0; i < frames; i++)
@@ -264,10 +263,18 @@ public class VAGWriter : IDisposable
 
             byte flags = 0;
 
-            // last frame (and any padding frames) have end+mute set
-            if (i >= actualFramesInSrc - 1 || srcOffset >= samples.Length)
+            if (i == frames - 1)
             {
-                flags = 1;
+                // last frame of last chunk has end flag set
+                if (lastChunk)
+                    flags |= 1;
+
+                // if enable loop flags, last frame of every chunk has end+repeat flags set
+                // this is necessary to enable PSn00bSDK's streaming playback
+                // basically it abuses hardware looping by overwriting the loop address to point at the next chunk in SPU RAM,
+                // then when the hardware encounters the frame with repeat flag set it will jump to the next chunk to be played
+                if (_loopFlags)
+                    flags |= 3;
             }
             
             if (srcOffset >= samples.Length)
